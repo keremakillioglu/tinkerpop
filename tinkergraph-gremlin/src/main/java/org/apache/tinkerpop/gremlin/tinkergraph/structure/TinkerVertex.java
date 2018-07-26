@@ -27,14 +27,7 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -179,5 +172,45 @@ public final class TinkerVertex extends TinkerElement implements Vertex {
             } else
                 return (Iterator) this.properties.entrySet().stream().filter(entry -> ElementHelper.keyExists(entry.getKey(), propertyKeys)).flatMap(entry -> entry.getValue().stream()).collect(Collectors.toList()).iterator();
         }
+    }
+
+    public boolean canReach(TinkerVertex v2) {
+        boolean isReachable = false;
+
+        if(this.graph.isComponentIndexEnabled()) {
+            // check the component index to decide whether it is reachable
+
+        } else {
+            // implement BFS based traversal here to reach v2
+
+            HashSet<TinkerVertex> visited = new HashSet<>();
+
+            Queue<TinkerVertex> queue = new LinkedList<>();
+            queue.offer(this);
+
+
+            while(!queue.isEmpty()) {
+                TinkerVertex current = queue.poll();
+                visited.add(current);
+
+                if(current.equals(v2)) {
+                    isReachable = true;
+                    break;
+                }
+
+                Iterator<Edge> edges = current.edges(Direction.BOTH);
+                while(edges.hasNext()) {
+                    Edge e = (TinkerEdge) edges.next();
+                    TinkerVertex otherEnd = (TinkerVertex) (e.inVertex().equals(this) ? e.outVertex() : e.inVertex());
+
+                        if(!visited.contains(otherEnd)) {
+                        queue.offer(otherEnd);
+                    }
+                }
+            }
+
+        }
+
+        return isReachable;
     }
 }

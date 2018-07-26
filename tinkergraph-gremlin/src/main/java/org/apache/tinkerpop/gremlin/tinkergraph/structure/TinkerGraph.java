@@ -95,6 +95,8 @@ public final class TinkerGraph implements Graph {
     protected TinkerIndex<TinkerVertex> vertexIndex = null;
     protected TinkerIndex<TinkerEdge> edgeIndex = null;
 
+    private boolean componentIndexEnabled = false;
+
     protected final IdManager<?> vertexIdManager;
     protected final IdManager<?> edgeIdManager;
     protected final IdManager<?> vertexPropertyIdManager;
@@ -458,6 +460,17 @@ public final class TinkerGraph implements Graph {
         public boolean willAllowId(final Object id) {
             return vertexIdManager.allow(id);
         }
+    }
+
+    ///////////// WEAKLY CONNECTED COMPONENT INDEXING METHODS ////////
+
+
+    public boolean isComponentIndexEnabled() {
+        return componentIndexEnabled;
+    }
+
+    public void enableComponentIndex() {
+        this.componentIndexEnabled = true;
     }
 
     ///////////// GRAPH SPECIFIC INDEXING METHODS ///////////////
