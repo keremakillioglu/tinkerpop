@@ -201,7 +201,7 @@ public final class TinkerVertex extends TinkerElement implements Vertex {
                 Iterator<Edge> edges = current.edges(Direction.BOTH);
                 while(edges.hasNext()) {
                     Edge e = (TinkerEdge) edges.next();
-                    TinkerVertex otherEnd = (TinkerVertex) (e.inVertex().equals(this) ? e.outVertex() : e.inVertex());
+                    TinkerVertex otherEnd = (TinkerVertex) (e.inVertex().equals(current) ? e.outVertex() : e.inVertex());
 
                         if(!visited.contains(otherEnd)) {
                         queue.offer(otherEnd);
