@@ -115,6 +115,10 @@ public final class TinkerVertex extends TinkerElement implements Vertex {
     public Edge addEdge(final String label, final Vertex vertex, final Object... keyValues) {
         if (null == vertex) throw Graph.Exceptions.argumentCanNotBeNull("vertex");
         if (this.removed) throw elementAlreadyRemoved(Vertex.class, this.id);
+
+        //Edges are processed when they are added to graph
+        this.graph.processEdge(this, vertex);
+
         return TinkerHelper.addEdge(this.graph, this, (TinkerVertex) vertex, label, keyValues);
     }
 
@@ -178,6 +182,14 @@ public final class TinkerVertex extends TinkerElement implements Vertex {
         boolean isReachable = false;
 
         if(this.graph.isComponentIndexEnabled()) {
+           Component c1 = this.graph.findComponent((Integer)this.id());
+           Component c2 = this.graph.findComponent((Integer) v2.id());
+
+           if (c1 == c2 && c1!= null){
+               isReachable=true;
+           }
+
+
             // check the component index to decide whether it is reachable
 
         } else {
@@ -213,4 +225,12 @@ public final class TinkerVertex extends TinkerElement implements Vertex {
 
         return isReachable;
     }
+
+
+
+
+
+
 }
+
+

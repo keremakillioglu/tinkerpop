@@ -42,17 +42,11 @@ import org.apache.tinkerpop.gremlin.tinkergraph.process.traversal.strategy.optim
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+
 
 /**
  * An in-memory (with optional persistence on calls to {@link #close()}), reference implementation of the property
@@ -95,7 +89,7 @@ public final class TinkerGraph implements Graph {
     protected TinkerIndex<TinkerVertex> vertexIndex = null;
     protected TinkerIndex<TinkerEdge> edgeIndex = null;
 
-    private boolean componentIndexEnabled = false;
+    private boolean componentIndexEnabled = true;
 
     protected final IdManager<?> vertexIdManager;
     protected final IdManager<?> edgeIdManager;
@@ -465,6 +459,70 @@ public final class TinkerGraph implements Graph {
     ///////////// WEAKLY CONNECTED COMPONENT INDEXING METHODS ////////
 
 
+    // Component List is Implemented here
+    ArrayList<Component> componentList= new ArrayList<Component>();
+
+
+
+
+
+    public Component findComponent (Integer id){
+
+        for (Component c: componentList){
+           if (c.existInComponent(id)){
+               return c;
+           }
+        }
+        return null;
+    }
+
+
+    public void processEdge(Vertex v1, Vertex v2){
+
+        if(! isComponentIndexEnabled()){
+            return;
+        }
+        Integer id1 = (Integer)v1.id();
+        Integer id2 = (Integer)v2.id();
+
+        Component c1= findComponent(id1);
+        Component c2= findComponent(id2);
+
+        if (c1 == null && c2 == null ){ //if none of the vertices exist in a path
+            Component emergedComponent = new Component(); // create a new path
+            emergedComponent.addToComponent(id1);
+            emergedComponent.addToComponent(id2);
+            this.componentList.add(emergedComponent);
+        }
+
+        else if(c1 != null && c2 != null ) { //if both of the vertices exist in a path
+
+            if (id1  == id2) {
+            }// if in the same path do nothing
+
+            else {  // merge two paths
+                for(Integer k : c2.currentSet){
+                    c1.addToComponent(k);
+                }
+
+                this.componentList.remove(c2);//DOES IT COUNT AS DELETED
+            }
+
+        }
+        else if (c1 != null && c2== null ){ //if v1 exist in a path and v2 does not
+            c1.addToComponent(id2);
+        }
+
+        else if (c2 != null && c1 == null ){ //if v2 exist in a path and v1 does not
+            c2.addToComponent(id1);
+        }
+    }
+
+
+
+
+
+
     public boolean isComponentIndexEnabled() {
         return componentIndexEnabled;
     }
@@ -472,6 +530,10 @@ public final class TinkerGraph implements Graph {
     public void enableComponentIndex() {
         this.componentIndexEnabled = true;
     }
+
+    public  void disableComponentIndex() {this.componentIndexEnabled = false;}
+
+
 
     ///////////// GRAPH SPECIFIC INDEXING METHODS ///////////////
 
